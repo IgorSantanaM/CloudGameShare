@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/CloudGameShare.BuildingBlocks.Domain/CloudGameShare.BuildingBlocks.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/1.Presentation/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/2.Application/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/3.Domain/">
+    <Project Path="src/Services/CatalogService/CloudGameShare.Catalog.Domain/CloudGameShare.Catalog.Domain.csproj" Id="c9064a67-fdaa-4098-b737-0948e30dac83" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-1.Infra.Data/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-2.Infra.Services/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-3.Infra.Messaging/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-4.Infra.CrossCutting/" />
+</Solution>
