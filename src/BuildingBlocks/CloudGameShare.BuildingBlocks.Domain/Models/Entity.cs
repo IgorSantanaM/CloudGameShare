@@ -1,4 +1,4 @@
-﻿using CloudGameShare.Domain.Core.Events;
+﻿ using CloudGameShare.Domain.Core.Events;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -10,8 +10,8 @@ namespace CloudGameShare.Domain.Core.Models
     public abstract class Entity<TId> where TId : notnull
     {
         public TId? Id { get; protected set; }
-        private List<Event<TId>> _domainEvent = new();
-        public IReadOnlyCollection<Event<TId>> DomainEvent => _domainEvent.AsReadOnly();
+        private List<Event<TId>> _domainEvents = new();
+        public IReadOnlyCollection<Event<TId>> DomainEvents => _domainEvents.AsReadOnly();
 
         public override bool Equals(object? obj)
         {
@@ -42,11 +42,11 @@ namespace CloudGameShare.Domain.Core.Models
 
         public override string ToString()
             => $"{GetType().Name} [Id={Id}]";
+        public void ClearDomainEvents()
+            => _domainEvents.Clear();    
 
         protected void AddDomainEvent(Event<TId> domainEvent)
-            => _domainEvent.Add(domainEvent);
+            => _domainEvents.Add(domainEvent);
 
-        protected void ClearDomainEvents()
-            => _domainEvent.Clear();    
     }
 }

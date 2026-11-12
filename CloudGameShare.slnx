@@ -1,16 +1,23 @@
 <Solution>
   <Folder Name="/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/CloudGameShare.BuildingBlocks.Domain/CloudGameShare.BuildingBlocks.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/CloudGameShare.BuildingBlocks.Infra/CloudGameShare.BuildingBlocks.Infra.csproj" Id="2f5fd95c-6cec-407c-8355-fb582f2d9991" />
   </Folder>
   <Folder Name="/Services/" />
   <Folder Name="/Services/CloudGameShare.Catalog/" />
-  <Folder Name="/Services/CloudGameShare.Catalog/1.Presentation/" />
-  <Folder Name="/Services/CloudGameShare.Catalog/2.Application/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/1.Presentation/">
+    <Project Path="src/Services/CatalogService/CloudGameShare.Catalog.Presentation.WebApi/CloudGameShare.Catalog.Presentation.WebApi.csproj" Id="113df12a-2d63-44b4-b8e9-4c111adca9ce" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.Catalog/2.Application/">
+    <Project Path="src/Services/CatalogService/CloudGameShare.Catalog.Application/CloudGameShare.Catalog.Application.csproj" />
+  </Folder>
   <Folder Name="/Services/CloudGameShare.Catalog/3.Domain/">
     <Project Path="src/Services/CatalogService/CloudGameShare.Catalog.Domain/CloudGameShare.Catalog.Domain.csproj" Id="c9064a67-fdaa-4098-b737-0948e30dac83" />
   </Folder>
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/" />
-  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-1.Infra.Data/" />
+  <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-1.Infra.Data/">
+    <Project Path="src/Services/CatalogService/CloudGameShare.Catalog.Infra.Data/CloudGameShare.Catalog.Infra.Data.csproj" Id="23d306b3-e192-4513-ab54-9217011f3dc8" />
+  </Folder>
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-2.Infra.Services/" />
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-3.Infra.Messaging/" />
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-4.Infra.CrossCutting/" />
