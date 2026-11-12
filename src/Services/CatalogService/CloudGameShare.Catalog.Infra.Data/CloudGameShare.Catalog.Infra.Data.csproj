@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-rc.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CloudGameShare.Catalog.Domain\CloudGameShare.Catalog.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\CloudGameShare.BuildingBlocks.Infra\CloudGameShare.BuildingBlocks.Infra.csproj" />
   </ItemGroup>
