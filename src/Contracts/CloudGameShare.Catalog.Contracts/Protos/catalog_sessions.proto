@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "CloudGameShare.Catalog.Contracts";
+package cloudgameshare.catalog.v1;
+
+service CatalogSessions {
+  rpc GetGameForSession(GetGameForSessionRequest) returns (GameForSessionResponse);
+}
+
+message GetGameForSessionRequest {
+  string game_id = 1;
+}
+
+enum SteamRuntime {
+  STEAM_RUNTIME_UNSPECIFIED = 0;
+  STEAM_RUNTIME_LINUX_NATIVE = 1;
+  STEAM_RUNTIME_PROTON = 2;
+}
+
+message GameForSessionResponse {
+  string steam_app_id = 1;
+  SteamRuntime runtime = 2;
+  optional string proton_version = 3;
+  int32 cpu_cores = 4;
+  int32 memory_gb = 5;
+  int32 gpu_count = 6;
+  int32 storage_gb = 7;
+}

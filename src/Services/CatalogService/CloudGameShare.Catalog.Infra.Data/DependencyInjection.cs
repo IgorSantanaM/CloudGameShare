@@ -12,12 +12,12 @@ public static class DependencyInjection
     extension(IServiceCollection services)
     {
         public IServiceCollection AddCatalogData(
-            Action<DbContextOptionsBuilder> configureDatabase)
+            string connectionString)
         {
             services.AddScoped<PublishDomainEventsInterceptor>();
             services.AddDbContext<CloudGameShareCatalogContext>((provider, options) =>
             {
-                configureDatabase(options);
+                options.UseNpgsql(connectionString);
                 options.AddInterceptors(provider.GetRequiredService<PublishDomainEventsInterceptor>());
             });
             services.AddScoped<IGameRepository, GameRepository>();

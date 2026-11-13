@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.85.0" />
+    <PackageReference Include="KubernetesClient" Version="21.0.8" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../CloudGameShare.GamingSession.Application/CloudGameShare.GamingSession.Application.csproj" />
+    <ProjectReference Include="../../../Contracts/CloudGameShare.Catalog.Contracts/CloudGameShare.Catalog.Contracts.csproj" />
+  </ItemGroup>
+</Project>

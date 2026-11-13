@@ -21,4 +21,22 @@
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-2.Infra.Services/" />
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-3.Infra.Messaging/" />
   <Folder Name="/Services/CloudGameShare.Catalog/4.Infra/4-4.Infra.CrossCutting/" />
+  <Folder Name="/Contracts/">
+    <Project Path="src/Contracts/CloudGameShare.Catalog.Contracts/CloudGameShare.Catalog.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.GamingSession/1.Presentation/">
+    <Project Path="src/Services/GamingSessionService/CloudGameShare.GamingSession.Presentation.WebApi/CloudGameShare.GamingSession.Presentation.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.GamingSession/2.Application/">
+    <Project Path="src/Services/GamingSessionService/CloudGameShare.GamingSession.Application/CloudGameShare.GamingSession.Application.csproj" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.GamingSession/3.Domain/">
+    <Project Path="src/Services/GamingSessionService/CloudGameShare.GamingSession.Domain/CloudGameShare.GamingSession.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.GamingSession/4.Infra/4-1.Infra.Data/">
+    <Project Path="src/Services/GamingSessionService/CloudGameShare.GamingSession.Infra.Data/CloudGameShare.GamingSession.Infra.Data.csproj" />
+  </Folder>
+  <Folder Name="/Services/CloudGameShare.GamingSession/4.Infra/4-2.Infra.Services/">
+    <Project Path="src/Services/GamingSessionService/CloudGameShare.GamingSession.Infra.Services/CloudGameShare.GamingSession.Infra.Services.csproj" />
+  </Folder>
 </Solution>

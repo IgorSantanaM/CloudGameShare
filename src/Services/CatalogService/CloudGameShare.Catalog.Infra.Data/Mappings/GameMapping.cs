@@ -1,5 +1,6 @@
 using CloudGameShare.BuildingBlocks.Infra.Extensions;
 using CloudGameShare.Catalog.Domain.Games;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CloudGameShare.Catalog.Infra.Data.Mappings;
@@ -16,6 +17,9 @@ public sealed class GameMapping : EntityTypeConfigurationExtension<Game>
         builder.Property(game => game.Genre).IsRequired();
         builder.Property(game => game.Publisher).IsRequired();
         builder.Property(game => game.Developer).IsRequired();
+        builder.Property(game => game.ReleaseDate)
+            .HasColumnType("timestamp without time zone")
+            .HasConversion(date => DateTime.SpecifyKind(date, DateTimeKind.Unspecified), date => date);
 
         builder.ComplexProperty(game => game.Requirements, requirements =>
         {
