@@ -2,6 +2,7 @@ using CloudGameShare.Catalog.Application;
 using CloudGameShare.Catalog.Infra.Data;
 using CloudGameShare.Catalog.Infra.Data.Contexts;
 using CloudGameShare.Catalog.Presentation.WebApi.Endpoints.Internal;
+using CloudGameShare.Catalog.Presentation.WebApi.Grpc;
 using CloudGameShare.Catalog.Presentation.WebApi.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -12,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("Catalog")
     ?? throw new InvalidOperationException("Configure the Catalog connection string.");
 
 builder.Services.AddOpenApi(options => options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+builder.Services.AddGrpc();
 
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 
@@ -39,6 +41,7 @@ app.UseHttpsRedirection();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseEndpoints<Program>();
+app.MapGrpcService<CatalogSessionsService>();
 
 app.MapGet("/", () => "Catalog API is running.");
 

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.85.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0-rc.3.26522.148">
       <PrivateAssets>all</PrivateAssets>
@@ -17,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../Contracts/CloudGameShare.Catalog.Contracts/CloudGameShare.Catalog.Contracts.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Application\CloudGameShare.Catalog.Application.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Infra.Data\CloudGameShare.Catalog.Infra.Data.csproj" />
   </ItemGroup>
