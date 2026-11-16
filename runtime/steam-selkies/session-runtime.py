@@ -9,9 +9,22 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 
-def prepare_library(app_id, runtime):
-    steamapps = Path.home() / ".steam/debian-installation/steamapps"
+def prepare_steam_client(installation):
+    copying = installation.parent / ".cloudgameshare-steam-copy"
+    if (installation / "steam.sh").is_file() and not copying.exists():
+        return
 
+    print("Copying the Steam client from the runtime image.")
+    installation.mkdir(parents=True, exist_ok=True)
+    copying.touch()
+    subprocess.run(
+        ("cp", "-a", "--reflink=auto", "/opt/cloudgameshare/steam-client/.", installation),
+        check=True,
+    )
+    copying.unlink()
+
+
+def prepare_library(steamapps, app_id, runtime):
     steamapps.mkdir(parents=True, exist_ok=True)
 
     if runtime == "proton":
@@ -117,7 +130,9 @@ def main():
     if runtime not in ("linux-native", "proton"):
         raise ValueError("GAME_RUNTIME must be linux-native or proton.")
 
-    prepare_library(app_id, runtime)
+    installation = Path.home() / ".steam/debian-installation"
+    prepare_steam_client(installation)
+    prepare_library(installation / "steamapps", app_id, runtime)
     
     if runtime == "proton" and (version := os.environ.get("PROTON_VERSION")):
         print(f"Requested Proton version: {version}. Select it in the Steam client for this game.")

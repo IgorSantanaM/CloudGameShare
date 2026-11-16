@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/selkies-project/selkies/desktop:2.1.0-debiantrixie@sha256:dd26d133435a051250f888f8d528438974696cc59047872f9cd71975fd97bb1e
+FROM ghcr.io/selkies-project/selkies/desktop:2.1.0-debiantrixie@sha256:dd26d133435a051250f888f8d528438974696cc59047872f9cd71975fd97bb1e AS base
 
 USER 0
 
@@ -13,7 +13,18 @@ RUN test "$(dpkg --print-architecture)" = amd64 \
     && rm -rf /var/lib/apt/lists/* \
     && install -d -o 1000 -g 1000 /game-state /steam-library /etc/service/cloudgameshare
 
+FROM base AS steam-client
+
+COPY --chmod=755 install-steam-client /usr/local/bin/install-steam-client
+
+USER 1000:1000
+RUN /usr/local/bin/install-steam-client
+
+FROM base
+
 RUN install -d -m 0755 /usr/local/lib/cloudgameshare
+
+COPY --from=steam-client --chown=1000:1000 /home/ubuntu/.steam/debian-installation/ /opt/cloudgameshare/steam-client/
 
 COPY --chmod=644 session-runtime.py \
     /usr/local/lib/cloudgameshare/session-runtime.py

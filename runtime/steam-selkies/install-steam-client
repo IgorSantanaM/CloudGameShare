@@ -1,0 +1,56 @@
+#!/bin/sh
+set -eu
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+export XDG_RUNTIME_DIR="$work/runtime"
+mkdir -m 700 "$XDG_RUNTIME_DIR"
+
+# Confirm Debian's download prompt during the build and log modal errors.
+cat > "$work/zenity" <<'EOF'
+#!/bin/sh
+for argument do
+    if [ "$argument" = '--title=Steam installer' ]; then
+        exit 0
+    fi
+done
+if [ "${1:-}" = '--error' ]; then
+    printf '%s\n' "$@" >&2
+    exit 1
+fi
+exec /usr/bin/zenity "$@"
+EOF
+chmod 755 "$work/zenity"
+export PATH="$work:$PATH"
+
+run_updater() {
+    status=0
+    timeout 20m xvfb-run -a "$@" > "$work/update.log" 2>&1 || status=$?
+    tail -n 15 "$work/update.log"
+
+    # The updater can request a restart after installing a new version.
+    case "$status" in
+        0|254) ;;
+        *) return "$status" ;;
+    esac
+}
+
+# Reuse Debian's checksum-verified bootstrap download. In this build-only
+# copy, invoke Valve's updater in the scout runtime without starting Steam.
+update='exec "$STEAMDIR/steam.sh" --run "$STEAMDIR/ubuntu12_32/steam" -exitsteam'
+sed "s|^exec \"\\\$STEAMDIR/steam\\.sh\" .*|$update|" /usr/games/steam > "$work/bootstrap"
+grep -Fxq "$update" "$work/bootstrap"
+run_updater sh "$work/bootstrap"
+
+cd "$HOME/.steam/debian-installation"
+test -s package/steam_client_ubuntu12.installed
+test -x steamrt64/steam
+# The build only downloads packages. Steam checks for namespaces normally
+# when a session launches it through /usr/games/steam.
+run_updater ./steamrt64/steam -skipsystemcheck -exitsteam
+test -s package/steam_client_steamrt64.installed
+
+# Keep the installed client and its verification manifests. Each player
+# creates their own configuration and downloads games into their own home.
+rm -rf appcache config logs steamapps userdata ubuntu12_32/steam-runtime.old
+find package -maxdepth 1 -type f ! -name '*.installed' ! -name '*.manifest' -delete
