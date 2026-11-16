@@ -37,7 +37,7 @@ public sealed class CreateSessionCommandHandler(
 
         var session = new GameSession(id, request.OwnerId, request.GameId, launchSpec, now,
             now.Add(settings.ProvisioningTimeout), now.Add(settings.SessionLifetime));
-
+        // Maybe publish a message via a broker to trigger provisioning instead of doing it here, but for now we can just let the worker pick it up.
         var saved = await repository.AddAsync(session, cancellationToken);
         return CheckRequest(saved, request);
     }

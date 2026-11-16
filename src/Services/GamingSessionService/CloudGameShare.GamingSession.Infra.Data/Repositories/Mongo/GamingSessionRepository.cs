@@ -32,6 +32,7 @@ internal sealed class GamingSessionRepository(IMongoCollection<GameSession> sess
     {
         var eligible = Filter.Lte(session => session.NextActionAtUtc, now)
             & (Filter.Eq(session => session.LeaseUntilUtc, null) | Filter.Lte(session => session.LeaseUntilUtc, now));
+
         var lease = Builders<GameSession>.Update
             .Set(session => session.LeaseId, Guid.NewGuid().ToString("N"))
             .Set(session => session.LeaseUntilUtc, now.Add(leaseDuration));

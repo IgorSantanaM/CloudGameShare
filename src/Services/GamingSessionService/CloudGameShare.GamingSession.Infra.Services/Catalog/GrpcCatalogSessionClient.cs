@@ -22,6 +22,7 @@ internal sealed class GrpcCatalogSessionClient(CatalogSessions.CatalogSessionsCl
                 SteamRuntime.Proton => SessionRuntime.Proton,
                 _ => throw new SessionRequestException(SessionRequestError.Conflict, "The game runtime is unsupported.")
             };
+
             return new SessionLaunchSpec(game.SteamAppId, runtime, game.HasProtonVersion ? game.ProtonVersion : null,
                 game.CpuCores, game.MemoryGb, game.GpuCount, game.StorageGb);
         }

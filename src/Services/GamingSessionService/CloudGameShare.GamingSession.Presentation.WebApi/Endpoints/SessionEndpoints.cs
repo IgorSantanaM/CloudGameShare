@@ -29,8 +29,11 @@ internal sealed class SessionEndpoints : IEndpoint
         CancellationToken cancellationToken)
     {
         var ownerId = context.User.FindFirst("sub")!.Value;
+
         var session = await sender.Send(new CreateSessionCommand(ownerId, request.GameId, idempotencyKey), cancellationToken);
+
         context.Response.Headers.RetryAfter = "2";
+
         return TypedResults.AcceptedAtRoute(session, StatusRoute, new { id = session.Id });
     }
 
@@ -41,7 +44,9 @@ internal sealed class SessionEndpoints : IEndpoint
         CancellationToken cancellationToken)
     {
         var ownerId = context.User.FindFirst("sub")!.Value;
+
         context.Response.Headers.CacheControl = "no-store";
+
         return TypedResults.Ok(await sender.Send(new GetSessionStatusQuery(ownerId, id), cancellationToken));
     }
 

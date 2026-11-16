@@ -1,4 +1,5 @@
 using CloudGameShare.GamingSession.Domain.Sessions;
+using CloudGameShare.GamingSession.Infra.Services.Provisioning.KubernetesSession;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -6,7 +7,7 @@ namespace CloudGameShare.GamingSession.Infra.Services.Provisioning;
 
 internal sealed class SessionProvisioningWorker(
     IGamingSessionRepository repository,
-    KubernetesSessionProvisioner provisioner,
+    IKubernetesSessionProvisioner provisioner,
     TimeProvider timeProvider,
     ILogger<SessionProvisioningWorker> logger) : BackgroundService
 {
@@ -40,9 +41,13 @@ internal sealed class SessionProvisioningWorker(
     private async Task ProcessAsync(GameSession session, CancellationToken stoppingToken)
     {
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+
         operation.CancelAfter(OperationTimeout);
+
         var now = UtcNow();
+
         GameSession updated;
+
         try
         {
             updated = await AdvanceAsync(session, now, operation.Token);
@@ -66,10 +71,12 @@ internal sealed class SessionProvisioningWorker(
 
         if (session.ReadyAtUtc is null && now >= session.ProvisionByUtc)
             return session.Finish(now, "The game did not become ready before the provisioning timeout.");
+
         if (now >= session.ExpiresAtUtc)
             return session.Finish(now);
 
         var pod = await provisioner.ObserveAsync(session, cancellationToken);
+
         return pod switch
         {
             PodState.Failed => session.Finish(now, "The game pod failed."),

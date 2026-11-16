@@ -26,6 +26,7 @@ public sealed class CatalogSessionsService(ISender sender) : CatalogSessions.Cat
                 GameRuntime.Proton => SteamRuntime.Proton,
                 _ => SteamRuntime.Unspecified
             };
+
             if (game.LaunchConfig.Launcher != GameLauncher.Steam || runtime == SteamRuntime.Unspecified)
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "This launcher or runtime is not supported for game sessions."));
 
