@@ -16,7 +16,7 @@ public sealed class GetAllGamesQueryHandler(IGameRepository repository)
         return new PagedResult<GameSummaryDto>
         {
             Items = games.Items
-                .Select(game => new GameSummaryDto(game.Id, game.Name, game.Genre, game.CoverImageUrl, game.IsPublished))
+                .Select(game => new GameSummaryDto(game.Id, game.Name, game.Description, game.Genre, game.CoverImageUrl, game.IsPublished))
                 .ToArray(),
             TotalCount = games.TotalCount,
             TotalPages = games.TotalPages

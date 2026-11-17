@@ -1,0 +1,13 @@
+services:
+  cloudgameshare.catalog.presentation.webapi:
+    image: ${DOCKER_REGISTRY-}cloudgamesharecatalogpresentationwebapi
+    build:
+      context: .
+      dockerfile: src/Services/CatalogService/CloudGameShare.Catalog.Presentation.WebApi/Dockerfile
+
+  cloudgameshare.gamingsession.presentation.webapi:
+    image: ${DOCKER_REGISTRY-}cloudgamesharegamingsessionpresentationwebapi
+    build:
+      context: .
+      dockerfile: src/Services/GamingSessionService/CloudGameShare.GamingSession.Presentation.WebApi/Dockerfile
+

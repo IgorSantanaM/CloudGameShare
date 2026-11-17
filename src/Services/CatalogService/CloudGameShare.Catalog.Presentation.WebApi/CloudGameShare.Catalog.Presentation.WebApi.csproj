@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>CloudGameShare.Catalog.WebApi-3cd7b215-6ba1-4096-96fb-4052e2a162d0</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +17,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.24.2-preview.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.2" />
   </ItemGroup>
 
@@ -22,6 +26,7 @@
     <ProjectReference Include="..\..\GamingSessionService\CloudGameShare.GamingSession.Infra.Services\CloudGameShare.GamingSession.Infra.Services.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Application\CloudGameShare.Catalog.Application.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Infra.Data\CloudGameShare.Catalog.Infra.Data.csproj" />
+    <ProjectReference Include="../CloudGameShare.Catalog.Infra.Services/CloudGameShare.Catalog.Infra.Services.csproj" />
   </ItemGroup>
 
 </Project>

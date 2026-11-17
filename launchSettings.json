@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "cloudgameshare.catalog.presentation.webapi": "StartDebugging",
+        "cloudgameshare.gamingsession.presentation.webapi": "StartDebugging"
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICatalogSessionClient, GrpcCatalogSessionClient>();
 
-        var provisioning = configuration.GetSection(ProvisioningOptions.SectionName).Get<ProvisioningOptions>();
+        var provisioning = configuration.GetSection(ProvisioningOptions.SectionName).Get<ProvisioningOptions>() ?? new ProvisioningOptions();
 
         var enabled = provisioning.Enabled ?? !string.IsNullOrWhiteSpace(provisioning.Image);
 

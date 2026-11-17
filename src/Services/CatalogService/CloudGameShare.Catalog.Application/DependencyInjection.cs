@@ -1,4 +1,6 @@
 using CloudGameShare.Catalog.Application.Behaviors;
+using CloudGameShare.Catalog.Application.Features.Games.Queries.GetSteamGameDetails;
+using CloudGameShare.Catalog.Application.Features.Games.Queries.SearchSteamGames;
 using CloudGameShare.Catalog.Application.Features.Games.Commands.CreateGame;
 using CloudGameShare.Catalog.Application.Features.Games.Commands.DeleteGame;
 using CloudGameShare.Catalog.Application.Features.Games.Commands.PublishGame;
@@ -25,6 +27,8 @@ public static class DependencyInjection
             services.AddScoped<IValidator<UnpublishGameCommand>, UnpublishGameCommandValidator>();
             services.AddScoped<IValidator<GetGameByIdQuery>, GetGameByIdQueryValidator>();
             services.AddScoped<IValidator<GetAllGamesQuery>, GetAllGamesQueryValidator>();
+            services.AddScoped<IValidator<SearchSteamGamesQuery>, SearchSteamGamesQueryValidator>();
+            services.AddScoped<IValidator<GetSteamGameDetailsQuery>, GetSteamGameDetailsQueryValidator>();
 
             return services.AddMediatR(configuration =>
             {
