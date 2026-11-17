@@ -77,7 +77,7 @@ def prepare_library(steamapps, app_id, runtime):
 
     if not local_manifest.exists():
         with tempfile.TemporaryDirectory(prefix=f".manifest-{app_id}-", dir=steamapps) as work:
-            staged = Path(work) / manifest_name
+            staged = Path(work) / manifest_namel
             shutil.copyfile(manifest, staged)
             staged.rename(local_manifest)
 
@@ -121,7 +121,9 @@ def selkies_responds():
 
 def main():
     app_id = os.environ.get("STEAM_APP_ID", "")
+
     runtime = os.environ.get("GAME_RUNTIME", "")
+
     if not re.fullmatch(r"[0-9]{1,10}", app_id) or not 0 < int(app_id) <= 0xFFFFFFFF:
         raise ValueError("STEAM_APP_ID must be a positive 32-bit Steam App ID.")
     

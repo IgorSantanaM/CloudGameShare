@@ -52,6 +52,7 @@ internal sealed class SessionProvisioningWorker(
         {
             updated = await AdvanceAsync(session, now, operation.Token);
         }
+
         catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
         {
             logger.LogWarning(exception, "Pod operation for session {SessionId} will be retried.", session.Id);

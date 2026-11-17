@@ -9,20 +9,17 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var mongoConnection = builder.Configuration.GetConnectionString("GamingSessions")
-    ?? throw new InvalidOperationException("Configure ConnectionStrings:GamingSessions.");
-
-var mongoDatabase = builder.Configuration["MongoDBSettings:DatabaseName"]
-    ?? throw new InvalidOperationException("Configure MongoDBSettings:DatabaseName.");
-
 builder.Services.AddOpenApi(options => options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
-builder.Services.AddSessionAuthentication(builder.Configuration, builder.Environment);
-builder.Services.AddGamingSessionApplication();
-builder.Services.AddGamingSessionData(mongoConnection, mongoDatabase);
-builder.Services.AddGamingSessionServices(builder.Configuration);
+
+builder.Services.AddSessionAuthentication(builder.Configuration, builder.Environment)
+    .AddGamingSessionApplication()
+    .AddGamingSessionData(builder.Configuration)
+    .AddGamingSessionServices(builder.Configuration);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

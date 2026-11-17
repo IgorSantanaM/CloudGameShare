@@ -23,25 +23,31 @@ internal sealed class GameEndpoints : IEndpoint
         var group = app.MapGroup("/api/games").WithTags("Games");
 
         group.MapPost("/create", CreateGameAsync);
+
         group.MapGet("/", GetAllGamesAsync);
+
         group.MapGet("/{id:guid}", GetGameByIdAsync).WithName(GetGameByIdRoute);
+
         group.MapPut("/{id:guid}", UpdateGameAsync);
+
         group.MapDelete("/{id:guid}", DeleteGameAsync);
+
         group.MapPost("/{id:guid}/publish", PublishGameAsync);
+
         group.MapPost("/{id:guid}/unpublish", UnpublishGameAsync);
     }
 
     private static async Task<CreatedAtRoute<CreatedGameResponse>> CreateGameAsync(
         [FromBody] CreateGameCommand command,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var id = await sender.Send(command, cancellationToken);
+        var id = await mediator.Send(command, cancellationToken);
         return TypedResults.CreatedAtRoute(new CreatedGameResponse(id), GetGameByIdRoute, new { id });
     }
 
     private static async Task<Ok<PagedResult<GameSummaryDto>>> GetAllGamesAsync(
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken,
         [FromQuery] string? name = null,
         [FromQuery] bool? isPublished = null,
@@ -49,21 +55,21 @@ internal sealed class GameEndpoints : IEndpoint
         [FromQuery] int pageSize = 20)
     {
         var query = new GetAllGamesQuery(name, isPublished, pageNumber, pageSize);
-        return TypedResults.Ok(await sender.Send(query, cancellationToken));
+        return TypedResults.Ok(await mediator.Send(query, cancellationToken));
     }
 
     private static async Task<Ok<GameDetailsDto>> GetGameByIdAsync(
         Guid id,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        return TypedResults.Ok(await sender.Send(new GetGameByIdQuery(id), cancellationToken));
+        return TypedResults.Ok(await mediator.Send(new GetGameByIdQuery(id), cancellationToken));
     }
 
     private static async Task<NoContent> UpdateGameAsync(
         Guid id,
         [FromBody] UpdateGameRequest request,
-        [FromServices] ISender sender,
+        [FromServices] IMediator sender,
         CancellationToken cancellationToken)
     {
         await sender.Send(request.ToCommand(id), cancellationToken);

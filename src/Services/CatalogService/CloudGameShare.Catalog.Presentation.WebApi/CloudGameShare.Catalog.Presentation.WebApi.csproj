@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../Contracts/CloudGameShare.Catalog.Contracts/CloudGameShare.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\..\GamingSessionService\CloudGameShare.GamingSession.Infra.Services\CloudGameShare.GamingSession.Infra.Services.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Application\CloudGameShare.Catalog.Application.csproj" />
     <ProjectReference Include="..\CloudGameShare.Catalog.Infra.Data\CloudGameShare.Catalog.Infra.Data.csproj" />
   </ItemGroup>

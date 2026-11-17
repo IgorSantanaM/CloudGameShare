@@ -1,6 +1,7 @@
 using CloudGameShare.Catalog.Contracts;
 using CloudGameShare.GamingSession.Application.Services;
 using CloudGameShare.GamingSession.Infra.Services.Catalog;
+using CloudGameShare.GamingSession.Infra.Services.Exceptions;
 using CloudGameShare.GamingSession.Infra.Services.Provisioning;
 using CloudGameShare.GamingSession.Infra.Services.Provisioning.KubernetesSession;
 using k8s;
@@ -20,12 +21,12 @@ public static class DependencyInjection
 
         services.AddScoped<ICatalogSessionClient, GrpcCatalogSessionClient>();
 
-        var provisioning = configuration.GetSection("Provisioning").Get<ProvisioningOptions>() ?? new ProvisioningOptions();
+        var provisioning = configuration.GetSection(ProvisioningOptions.SectionName).Get<ProvisioningOptions>();
 
         var enabled = provisioning.Enabled ?? !string.IsNullOrWhiteSpace(provisioning.Image);
 
         if (provisioning.TimeoutSeconds <= 0 || provisioning.SessionLifetimeSeconds < provisioning.TimeoutSeconds)
-            throw new InvalidOperationException("Provisioning timeout must be positive and cannot exceed session lifetime.");
+            throw new ResourceNotConfiguredException("Provisioning timeout must be positive and cannot exceed session lifetime.");
 
         services.AddSingleton(new SessionSettings(enabled, TimeSpan.FromSeconds(provisioning.TimeoutSeconds),
             TimeSpan.FromSeconds(provisioning.SessionLifetimeSeconds)));
@@ -38,14 +39,14 @@ public static class DependencyInjection
 
         if (string.IsNullOrWhiteSpace(provisioning.Namespace) || string.IsNullOrWhiteSpace(provisioning.GpuResourceName)
             || provisioning.ReadinessPort is < 1 or > 65535 || !provisioning.ReadinessPath.StartsWith('/'))
-            throw new InvalidOperationException("Configure the provisioning namespace, GPU resource, and HTTP readiness probe.");
+            throw new ResourceNotConfiguredException("Configure the provisioning namespace, GPU resource, and HTTP readiness probe.");
 
         if (provisioning.PlayerStorageGiB is <= 0
             || provisioning.PlayerStorageGiB is null && !string.IsNullOrWhiteSpace(provisioning.PlayerStorageClass))
-            throw new InvalidOperationException("Set Provisioning:PlayerStorageGiB to a positive size to enable player storage.");
+            throw new ResourceNotConfiguredException("Set Provisioning:PlayerStorageGiB to a positive size to enable player storage.");
 
         if (provisioning.AllowUnconfinedSeccomp && !string.IsNullOrWhiteSpace(provisioning.SeccompLocalhostProfile))
-            throw new InvalidOperationException("Choose either a local seccomp profile or unconfined seccomp.");
+            throw new ResourceNotConfiguredException("Choose either a local seccomp profile or unconfined seccomp.");
 
         services.AddSingleton(provisioning);
         services.AddSingleton<IKubernetes>(_ => new Kubernetes(CreateKubeConfig(provisioning)));

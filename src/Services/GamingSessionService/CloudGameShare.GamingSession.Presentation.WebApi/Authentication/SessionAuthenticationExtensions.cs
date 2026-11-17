@@ -5,7 +5,7 @@ namespace CloudGameShare.GamingSession.Presentation.WebApi.Authentication;
 
 internal static class SessionAuthenticationExtensions
 {
-    public static void AddSessionAuthentication(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    public static IServiceCollection AddSessionAuthentication(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         var developmentUser = environment.IsDevelopment() ? configuration["Authentication:DevelopmentUserId"] : null;
         if (!string.IsNullOrWhiteSpace(developmentUser))
@@ -27,5 +27,7 @@ internal static class SessionAuthenticationExtensions
         services.AddAuthorizationBuilder().AddPolicy("SessionOwner", policy =>
             policy.RequireAuthenticatedUser().RequireAssertion(context =>
                 !string.IsNullOrWhiteSpace(context.User.FindFirst("sub")?.Value)));
+
+        return services;
     }
 }
