@@ -1,6 +1,7 @@
 using CloudGameShare.GamingSession.Domain.Sessions;
 using CloudGameShare.GamingSession.Infra.Data.Mappings.Mongo;
 using CloudGameShare.GamingSession.Infra.Data.Repositories.Mongo;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -8,8 +9,14 @@ namespace CloudGameShare.GamingSession.Infra.Data;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddGamingSessionData(this IServiceCollection services, string connectionString, string databaseName)
+    public static IServiceCollection AddGamingSessionData(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("MongoDBSettings:ConnectionString")
+            ?? throw new InvalidOperationException("Configure ConnectionStrings:GamingSessions.");  
+
+        var databaseName = configuration["MongoDBSettings:DatabaseName"]
+            ?? throw new InvalidOperationException("Configure MongoDBSettings:DatabaseName.");
+
         GamingSessionMap.Configure();
 
         services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));

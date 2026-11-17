@@ -1,4 +1,5 @@
 using CloudGameShare.GamingSession.Application.Exceptions;
+using CloudGameShare.GamingSession.Infra.Services.Exceptions;
 using FluentValidation;
 using MongoDB.Driver;
 
@@ -16,13 +17,14 @@ internal sealed class ErrorHandlingMiddleware(RequestDelegate next, ILogger<Erro
         {
             var error = exception switch
             {
-                ValidationException validation => new ErrorResponse(400, "Validation failed.",
+                ValidationException validation => new ErrorResponse(StatusCodes.Status400BadRequest, "Validation failed.",
                     validation.Errors.Select(failure => new FieldError(failure.PropertyName, failure.ErrorMessage)).ToArray()),
                 BadHttpRequestException badRequest => new ErrorResponse(badRequest.StatusCode, badRequest.Message),
                 SessionRequestException { Error: SessionRequestError.NotFound } missing => new ErrorResponse(404, missing.Message),
                 SessionRequestException { Error: SessionRequestError.Conflict } conflict => new ErrorResponse(409, conflict.Message),
-                SessionRequestException unavailable => new ErrorResponse(503, unavailable.Message),
-                MongoConnectionException or TimeoutException => new ErrorResponse(503, "Session storage is temporarily unavailable."),
+                SessionRequestException unavailable => new ErrorResponse(StatusCodes.Status503ServiceUnavailable, unavailable.Message),
+                MongoConnectionException or TimeoutException => new ErrorResponse(StatusCodes.Status503ServiceUnavailable, "Session storage is temporarily unavailable."),
+                ResourceNotConfiguredException resourceNotConfigured => new ErrorResponse(StatusCodes.Status400BadRequest, resourceNotConfigured.Message),
                 _ => new ErrorResponse(500, "An unexpected error occurred.")
             };
             if (error.Status >= 500)

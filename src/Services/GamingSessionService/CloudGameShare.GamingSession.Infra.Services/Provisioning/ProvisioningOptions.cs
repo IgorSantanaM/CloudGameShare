@@ -2,6 +2,7 @@ namespace CloudGameShare.GamingSession.Infra.Services.Provisioning;
 
 internal sealed class ProvisioningOptions
 {
+    public const string SectionName = "Provisioning";
     public const string DefaultImage = "cloudgameshare/steam-selkies:dev";
 
     public bool? Enabled { get; set; }

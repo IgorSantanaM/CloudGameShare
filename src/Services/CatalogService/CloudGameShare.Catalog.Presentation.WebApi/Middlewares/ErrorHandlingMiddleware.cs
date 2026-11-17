@@ -1,5 +1,6 @@
 using CloudGameShare.BuildingBlocks.Domain.Exceptions;
 using CloudGameShare.Catalog.Application.Exceptions;
+using CloudGameShare.GamingSession.Infra.Services.Exceptions;
 using FluentValidation;
 
 namespace CloudGameShare.Catalog.Presentation.WebApi.Middlewares;
@@ -23,6 +24,7 @@ internal sealed class ErrorHandlingMiddleware(RequestDelegate next, ILogger<Erro
                 BadHttpRequestException badRequest => new ErrorResponse(badRequest.StatusCode, badRequest.Message),
                 DomainException domain => new ErrorResponse(StatusCodes.Status422UnprocessableEntity, domain.Message),
                 NotFoundException notFound => new ErrorResponse(StatusCodes.Status404NotFound, notFound.Message),
+                ResourceNotConfiguredException resourceNotFound => new ErrorResponse(StatusCodes.Status400BadRequest, resourceNotFound.Message),
                 _ => new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
             };
 

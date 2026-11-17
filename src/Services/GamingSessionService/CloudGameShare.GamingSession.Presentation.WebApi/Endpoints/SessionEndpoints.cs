@@ -17,20 +17,24 @@ internal sealed class SessionEndpoints : IEndpoint
         var group = app.MapGroup("/api/gaming/sessions")
             .WithTags("Gaming Sessions")
             .RequireAuthorization("SessionOwner");
+
         group.MapPost("/", CreateAsync);
+
         group.MapGet("/{id:guid}", GetStatusAsync).WithName(StatusRoute);
     }
 
     private static async Task<AcceptedAtRoute<SessionStatusDto>> CreateAsync(
         [FromBody] CreateSessionRequest request,
         [FromHeader(Name = "Idempotency-Key")] Guid? idempotencyKey,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         HttpContext context,
         CancellationToken cancellationToken)
     {
         var ownerId = context.User.FindFirst("sub")!.Value;
 
-        var session = await sender.Send(new CreateSessionCommand(ownerId, request.GameId, idempotencyKey), cancellationToken);
+        CreateSessionCommand command = new CreateSessionCommand(ownerId, request.GameId, idempotencyKey);
+
+        var session = await mediator.Send(command, cancellationToken);
 
         context.Response.Headers.RetryAfter = "2";
 
@@ -39,7 +43,7 @@ internal sealed class SessionEndpoints : IEndpoint
 
     private static async Task<Ok<SessionStatusDto>> GetStatusAsync(
         Guid id,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         HttpContext context,
         CancellationToken cancellationToken)
     {
@@ -47,7 +51,10 @@ internal sealed class SessionEndpoints : IEndpoint
 
         context.Response.Headers.CacheControl = "no-store";
 
-        return TypedResults.Ok(await sender.Send(new GetSessionStatusQuery(ownerId, id), cancellationToken));
+        GetSessionStatusQuery query = new GetSessionStatusQuery(ownerId, id);
+        var status = await mediator.Send(query, cancellationToken);
+
+        return TypedResults.Ok(status);
     }
 
     private sealed record CreateSessionRequest(Guid GameId);
