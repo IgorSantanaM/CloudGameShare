@@ -1,5 +1,6 @@
 using CloudGameShare.Catalog.Application;
 using CloudGameShare.Catalog.Infra.Data;
+using CloudGameShare.Catalog.Infra.Services;
 using CloudGameShare.Catalog.Infra.Data.Contexts;
 using CloudGameShare.Catalog.Presentation.WebApi.Endpoints.Internal;
 using CloudGameShare.Catalog.Presentation.WebApi.Grpc;
@@ -21,6 +22,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddCatalogApplication();
+builder.Services.AddCatalogServices();
 
 builder.Services.AddCatalogData(connectionString);
 
