@@ -31,7 +31,8 @@ services:
     networks:
      - cloudgameshare-network
     depends_on:
-    - CatalogService.Postgres
+    - CatalogService.Postgres:
+        condition: service_started
 
   GamingSessionService.WebApi:
     image: ${DOCKER_REGISTRY-}cloudgamesharegamingsessionpresentationwebapi
@@ -43,6 +44,16 @@ services:
     networks:
     - cloudgameshare-network
     depends_on:
-    - GameSessionService.MongoDb
-    
+    - GameSessionService.MongoDb:
+        condition: service_started
 
+  CloudGameShare.Frontend:
+    image: ${DOCKER_REGISTRY-}cloudgamesharefrontend
+    build:
+      context: .
+      dockerfile: src/Frontend/CloudGameShare.Frontend/Dockerfile
+    ports: 
+    - "3000:3000"
+    networks:
+    - cloudgameshare-network:
+        
