@@ -1,13 +1,48 @@
 services:
-  cloudgameshare.catalog.presentation.webapi:
+  CatalogService.Postgres:
+    image: postgres:15.3-alpine
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "@@Postgres123@@"
+      POSTGRES_DB: "cloudgameshare_catalog"
+    ports:
+      - "5432:5432"
+    networks:
+      - cloudgameshare-network
+
+  GameSessionService.MongoDb:
+    image: mongo:7.0.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "@@Mongo123@@"
+      MONGO_INITDB_ROOT_DATABASE: "cloudgameshare_gamingsession"
+    ports:
+      - "27017:27017"
+    networks:
+      - cloudgameshare-network
+
+  CatalogService.WebApi:
     image: ${DOCKER_REGISTRY-}cloudgamesharecatalogpresentationwebapi
     build:
       context: .
       dockerfile: src/Services/CatalogService/CloudGameShare.Catalog.Presentation.WebApi/Dockerfile
+    ports: 
+    - "8080:8080"
+    networks:
+     - cloudgameshare-network
+    depends_on:
+    - CatalogService.Postgres
 
-  cloudgameshare.gamingsession.presentation.webapi:
+  GamingSessionService.WebApi:
     image: ${DOCKER_REGISTRY-}cloudgamesharegamingsessionpresentationwebapi
     build:
       context: .
       dockerfile: src/Services/GamingSessionService/CloudGameShare.GamingSession.Presentation.WebApi/Dockerfile
+    ports: 
+    - "8081:8081"
+    networks:
+    - cloudgameshare-network
+    depends_on:
+    - GameSessionService.MongoDb
+    
 
