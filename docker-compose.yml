@@ -26,34 +26,32 @@ services:
     build:
       context: .
       dockerfile: src/Services/CatalogService/CloudGameShare.Catalog.Presentation.WebApi/Dockerfile
-    ports: 
-    - "8080:8080"
     networks:
-     - cloudgameshare-network
-    depends_on:
-    - CatalogService.Postgres:
-        condition: service_started
+      - cloudgameshare-network
 
   GamingSessionService.WebApi:
     image: ${DOCKER_REGISTRY-}cloudgamesharegamingsessionpresentationwebapi
     build:
       context: .
       dockerfile: src/Services/GamingSessionService/CloudGameShare.GamingSession.Presentation.WebApi/Dockerfile
-    ports: 
-    - "8081:8081"
     networks:
-    - cloudgameshare-network
-    depends_on:
-    - GameSessionService.MongoDb:
-        condition: service_started
+      - cloudgameshare-network
 
-  CloudGameShare.Frontend:
+  cloudgameshare.frontend:
     image: ${DOCKER_REGISTRY-}cloudgamesharefrontend
     build:
-      context: .
-      dockerfile: src/Frontend/CloudGameShare.Frontend/Dockerfile
-    ports: 
-    - "3000:3000"
-    networks:
-    - cloudgameshare-network:
-        
+      context: ./frontend/cloudgamesharefrontend
+      dockerfile: frontend/cloudgamesharefrontend/Dockerfile
+    ports:
+      - "8080:8080"
+    dependds_on:
+      cloudgameshare.catalog.presentation.webapi:
+        condition: service_healthy
+      cloudgameshare.gamingsession.presentation.webapi:
+        condition: service_healthy
+    networks:   
+      - cloudgameshare-network
+
+networks:
+  cloudgameshare-network:
+    driver: bridge

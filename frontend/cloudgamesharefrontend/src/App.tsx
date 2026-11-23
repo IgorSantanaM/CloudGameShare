@@ -2,9 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import controllerArt from './assets/arcade-controller.png'
 import defaultCover from './assets/default-game-cover.png'
-import { createGame, getCatalog } from './catalogApi'
-import type { CatalogGame, SteamGameDetails } from './catalogApi'
+import { createGame, getCatalog, updateGame } from './catalogApi'
+import type { CatalogGame, GameDetails, SteamGameDetails } from './catalogApi'
 import SteamAutofill from './SteamAutofill'
+import GameDetailsDialog from './GameDetailsDialog'
+import SessionPanel from './SessionPanel'
+import { isPlaybackBlocked, usePlaybackBlocked } from './playback'
 import './App.css'
 
 type CatalogState =
@@ -50,6 +53,10 @@ function App() {
   const [isSaving, setIsSaving] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [steamQuery, setSteamQuery] = useState('')
+  const [editingGame, setEditingGame] = useState<GameDetails | null>(null)
+  const [selectedGame, setSelectedGame] = useState<CatalogGame | null>(null)
+  const [sessionGame, setSessionGame] = useState<CatalogGame | null>(null)
+  const blocked = usePlaybackBlocked()
   const addDialog = useRef<HTMLDialogElement>(null)
   const addForm = useRef<HTMLFormElement>(null)
   const games = catalog.status === 'ready' ? catalog.games : []
@@ -117,6 +124,31 @@ function App() {
     setCatalogVersion((version) => version + 1)
   }
 
+  function editGame(game: GameDetails) {
+    setEditingGame(game)
+    setFormError('')
+    setIsAddOpen(true)
+    const values = {
+      ...game,
+      ...game.requirements,
+      ...game.launchConfig,
+      imageUrl: game.coverImageUrl ?? '',
+      releaseDate: game.releaseDate.slice(0, 10),
+    }
+    for (const [name, value] of Object.entries(values)) {
+      const field = addForm.current?.elements.namedItem(name)
+      if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+        field.value = String(value ?? '')
+      }
+    }
+    addDialog.current?.showModal()
+  }
+
+  function playGame(game: CatalogGame) {
+    if (isPlaybackBlocked() || !game.isPublished || sessionGame) return
+    setSessionGame(game)
+  }
+
   async function addGame(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (isSaving) return
@@ -130,7 +162,7 @@ function App() {
     setFormError('')
     setIsSaving(true)
     try {
-      await createGame({
+      const payload = {
         name,
         genre: value('genre'),
         publisher: value('publisher'),
@@ -138,6 +170,8 @@ function App() {
         description: value('description') || null,
         releaseDate: `${date}T00:00:00Z`,
         coverImageUrl: value('imageUrl') || null,
+        trailerUrl: value('trailerUrl') || null,
+        gameUrl: value('gameUrl') || null,
         requirements: {
           cpuCores: Number(value('cpuCores')),
           memoryGb: Number(value('memoryGb')),
@@ -148,15 +182,18 @@ function App() {
           launcher: value('launcher'),
           appId: value('appId'),
           runtime: value('runtime'),
+          protonVersion: value('protonVersion') || null,
         },
-      })
+      }
+      if (editingGame) await updateGame(editingGame.id, payload)
+      else await createGame(payload)
       form.reset()
       addDialog.current?.close()
       clearFilters()
-      setAnnouncement(`${name} added to the catalog.`)
+      setAnnouncement(`${name} ${editingGame ? 'updated' : 'added to the catalog'}.`)
       reloadCatalog()
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Unable to add the game.')
+      setFormError(error instanceof Error ? error.message : 'Unable to save the game.')
     } finally {
       setIsSaving(false)
     }
@@ -174,6 +211,8 @@ function App() {
             <a href="#catalog"><PixelIcon name="grid" /> Catalog</a>
           </nav>
           <button className="button button-pink header-add" type="button" onClick={() => {
+            setEditingGame(null)
+            addForm.current?.reset()
             setFormError('')
             setIsAddOpen(true)
             addDialog.current?.showModal()
@@ -189,13 +228,15 @@ function App() {
             <h1 id="hero-title">The Game<br /><span>Library.</span></h1>
             <p>Find your next game or add one to the collection.</p>
             <a className="button button-cream" href="#catalog">
-              Browse Games <PixelIcon name="arrow" />
+              Browse Games
             </a>
           </div>
           <img className="hero-art" src={controllerArt} alt="" width="1536" height="1024" />
         </section>
 
         <section className="catalog" id="catalog" aria-labelledby="catalog-title">
+          {blocked && <p className="mobile-notice" id="mobile-playback-note">Mobile gameplay is currently unsupported. You can browse and manage games here. Use a desktop to play.</p>}
+          {sessionGame && <SessionPanel key={sessionGame.id} game={sessionGame} onDismiss={() => setSessionGame(null)} />}
           <div className="catalog-heading">
             <h2 id="catalog-title">Game Catalog</h2>
             <label className="search">
@@ -235,7 +276,13 @@ function App() {
                     </div>
                     <div className="game-info">
                       <h3>{game.name}</h3>
+                      <span className="publication-status">{game.isPublished ? 'Published' : 'Draft'}</span>
                       {game.description && <p>{game.description}</p>}
+                      <div className="card-actions">
+                        <button className="button button-cream" onClick={() => setSelectedGame(game)}>Details</button>
+                        <button className="button button-pink" disabled={blocked || !game.isPublished || !!sessionGame} aria-describedby={blocked ? 'mobile-playback-note' : undefined} onClick={() => playGame(game)}>Play</button>
+                      </div>
+                      {!blocked && !game.isPublished && <p className="playback-note">Publish from Details to enable play.</p>}
                     </div>
                   </article>
                 </li>
@@ -259,6 +306,8 @@ function App() {
 
       <p className="announcement" role="status" hidden={!announcement}>{announcement}</p>
 
+      {selectedGame && <GameDetailsDialog key={selectedGame.id} game={selectedGame} blocked={blocked} sessionActive={!!sessionGame} onClose={() => setSelectedGame(null)} onEdit={editGame} onPlay={playGame} onChanged={(message) => { setAnnouncement(message); reloadCatalog() }} />}
+
       <dialog ref={addDialog} className="add-dialog" aria-labelledby="add-title" onClose={() => {
         setIsAddOpen(false)
         setSteamQuery('')
@@ -266,8 +315,8 @@ function App() {
         if (isSaving) event.preventDefault()
       }}>
         <div className="dialog-heading">
-          <h2 id="add-title">Add Game</h2>
-          <button type="button" className="close-button" aria-label="Close Add Game" disabled={isSaving} onClick={() => addDialog.current?.close()}>
+          <h2 id="add-title">{editingGame ? 'Edit Game' : 'Add Game'}</h2>
+          <button type="button" className="close-button" aria-label="Close game form" disabled={isSaving} onClick={() => addDialog.current?.close()}>
             <PixelIcon name="close" />
           </button>
         </div>
@@ -285,6 +334,8 @@ function App() {
                 <span>Cover image URL <span className="optional">(optional)</span></span>
                 <input type="url" name="imageUrl" placeholder="https://example.com/cover.png" />
               </label>
+              <label>Trailer URL (optional)<input type="url" name="trailerUrl" /></label>
+              <label>Game website URL (optional)<input type="url" name="gameUrl" /></label>
             </div>
             <label>
               <span>Description <span className="optional">(optional)</span></span>
@@ -320,6 +371,7 @@ function App() {
                     <option value="WindowsNative">Windows native</option>
                   </select>
                 </label>
+                <label>Proton version (optional)<input name="protonVersion" /></label>
               </div>
             </fieldset>
             <fieldset className="form-group">
@@ -335,7 +387,7 @@ function App() {
           {formError && <p className="form-error" role="alert">{formError}</p>}
           <div className="dialog-actions">
             <button type="button" className="button button-cream" disabled={isSaving} onClick={() => addDialog.current?.close()}>Cancel</button>
-            <button className="button button-pink" type="submit" disabled={isSaving}><PixelIcon name="plus" /> {isSaving ? 'Adding…' : 'Add Game'}</button>
+            <button className="button button-pink" type="submit" disabled={isSaving}><PixelIcon name="plus" /> {isSaving ? 'Saving…' : editingGame ? 'Save Changes' : 'Add Game'}</button>
           </div>
         </form>
       </dialog>
