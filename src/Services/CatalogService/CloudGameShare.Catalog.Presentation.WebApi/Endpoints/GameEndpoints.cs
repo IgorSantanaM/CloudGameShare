@@ -87,19 +87,19 @@ internal sealed class GameEndpoints : IEndpoint
 
     private static async Task<NoContent> PublishGameAsync(
         Guid id,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new PublishGameCommand(id), cancellationToken);
+        await mediator.Send(new PublishGameCommand(id), cancellationToken);
         return TypedResults.NoContent();
     }
 
     private static async Task<NoContent> UnpublishGameAsync(
         Guid id,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new UnpublishGameCommand(id), cancellationToken);
+        await mediator.Send(new UnpublishGameCommand(id), cancellationToken);
         return TypedResults.NoContent();
     }
 
