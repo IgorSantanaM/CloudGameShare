@@ -9,4 +9,8 @@ public sealed record SteamGameDetailsDto(
     string[] Publishers,
     string[] Developers,
     string? CoverImageUrl,
-    bool SupportsLinux);
+    bool SupportsLinux)
+{
+    public SteamRequirementsDto? PcRequirements { get; init; }
+    public SteamRequirementsDto? LinuxRequirements { get; init; }
+}

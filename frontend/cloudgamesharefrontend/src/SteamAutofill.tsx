@@ -7,7 +7,7 @@ type LookupState =
   | { status: 'loading' }
   | { status: 'results'; games: SteamGameSummary[] }
   | { status: 'error'; message: string }
-  | { status: 'filled'; name: string }
+  | { status: 'filled'; game: SteamGameDetails }
 
 type Props = {
   query: string
@@ -38,7 +38,7 @@ export default function SteamAutofill({ query, disabled, onApply }: Props) {
           const game = await getSteamGame(Number(input), language, controller.signal)
           if (controller.signal.aborted) return
           onApply(game)
-          setState({ status: 'filled', name: game.name })
+          setState({ status: 'filled', game })
         } else {
           const games = await searchSteamGames(input, language, controller.signal)
           if (!controller.signal.aborted) setState({ status: 'results', games })
@@ -66,7 +66,7 @@ export default function SteamAutofill({ query, disabled, onApply }: Props) {
       const game = await getSteamGame(appId, language, controller.signal)
       if (controller.signal.aborted) return
       onApply(game)
-      setState({ status: 'filled', name: game.name })
+      setState({ status: 'filled', game })
     } catch (error) {
       if (!controller.signal.aborted) setState({
         status: 'error',
@@ -92,10 +92,29 @@ export default function SteamAutofill({ query, disabled, onApply }: Props) {
       </div>
       <div role="status" aria-live="polite">
         {state.status === 'loading' && <p>Looking up Steam…</p>}
-        {state.status === 'filled' && <p>Details filled for {state.name}. Review before adding.</p>}
+        {state.status === 'filled' && <p>Details filled for {state.game.name}. Review before adding.</p>}
         {state.status === 'results' && state.games.length === 0 && <p>No Steam matches found. You can enter the details manually.</p>}
         {state.status === 'error' && <p>{state.message}</p>}
       </div>
+      {state.status === 'filled' && (
+        <>
+          <p className="requirements-note">Hardware fields use available PC minimum values, rounded up to whole GB. Review core counts and set the GPU count for your session.</p>
+          <details className="steam-requirements">
+            <summary>Steam hardware requirements</summary>
+            {([
+              ['PC', state.game.pcRequirements],
+              ['Linux', state.game.linuxRequirements],
+            ] as const).map(([platform, requirements]) => requirements && (
+              <section key={platform} aria-label={`${platform} requirements`}>
+                <h3>{platform}</h3>
+                {requirements.minimum && <><h4>Minimum</h4><p>{requirements.minimum.text}</p></>}
+                {requirements.recommended && <><h4>Recommended</h4><p>{requirements.recommended.text}</p></>}
+              </section>
+            ))}
+            {!state.game.pcRequirements && !state.game.linuxRequirements && <p>Steam has no published hardware requirements for this game.</p>}
+          </details>
+        </>
+      )}
       {state.status === 'results' && state.games.length > 0 && (
         <ul className="steam-results">
           {state.games.map((game) => (

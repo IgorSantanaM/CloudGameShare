@@ -1,56 +1,121 @@
+name: cloudgameshare
+
 services:
-  CatalogService.Postgres:
+  catalog-postgres:
     image: postgres:15.3-alpine
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "@@Postgres123@@"
-      POSTGRES_DB: "cloudgameshare_catalog"
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: gameshare
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-gameshare123}"
+      POSTGRES_DB: cloudgameshare_catalog
+    volumes:
+      - catalog-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gameshare -d cloudgameshare_catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     networks:
       - cloudgameshare-network
 
-  GameSessionService.MongoDb:
+  gaming-mongodb:
     image: mongo:7.0.4
     environment:
-      MONGO_INITDB_ROOT_USERNAME: "root"
-      MONGO_INITDB_ROOT_PASSWORD: "@@Mongo123@@"
-      MONGO_INITDB_ROOT_DATABASE: "cloudgameshare_gamingsession"
-    ports:
-      - "27017:27017"
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD:-gameshare123}"
+    volumes:
+      - gaming-mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     networks:
       - cloudgameshare-network
 
-  CatalogService.WebApi:
+  cloudgameshare.catalog.presentation.webapi:
     image: ${DOCKER_REGISTRY-}cloudgamesharecatalogpresentationwebapi
     build:
       context: .
       dockerfile: src/Services/CatalogService/CloudGameShare.Catalog.Presentation.WebApi/Dockerfile
+      target: final
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Catalog: "Host=catalog-postgres;Port=5432;Database=cloudgameshare_catalog;Username=gameshare;Password=${POSTGRES_PASSWORD:-gameshare123}"
+      Kestrel__Endpoints__Http__Url: http://0.0.0.0:8080
+      Kestrel__Endpoints__Http__Protocols: Http1
+      Kestrel__Endpoints__Grpc__Url: http://0.0.0.0:8082
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+    ports:
+      - "127.0.0.1:${CATALOG_PORT:-5001}:8080"
+    depends_on:
+      catalog-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     networks:
-      - cloudgameshare-network
+      cloudgameshare-network:
+        aliases:
+          - catalog-api
 
-  GamingSessionService.WebApi:
+  cloudgameshare.gamingsession.presentation.webapi:
     image: ${DOCKER_REGISTRY-}cloudgamesharegamingsessionpresentationwebapi
     build:
       context: .
       dockerfile: src/Services/GamingSessionService/CloudGameShare.GamingSession.Presentation.WebApi/Dockerfile
+      target: final
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__GamingSessions: "mongodb://root:${MONGO_PASSWORD:-gameshare123}@gaming-mongodb:27017/?authSource=admin&serverSelectionTimeoutMS=5000"
+      MongoDBSettings__DatabaseName: cloudgameshare_sessions
+      Catalog__GrpcAddress: http://catalog-api:8082
+      Authentication__DevelopmentUserId: compose-player
+      Provisioning__Enabled: "false"
+    ports:
+      - "127.0.0.1:${GAMING_SESSION_PORT:-5003}:8080"
+    depends_on:
+      gaming-mongodb:
+        condition: service_healthy
+      cloudgameshare.catalog.presentation.webapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     networks:
-      - cloudgameshare-network
+      cloudgameshare-network:
+        aliases:
+          - gaming-session-api
 
   cloudgameshare.frontend:
     image: ${DOCKER_REGISTRY-}cloudgamesharefrontend
     build:
       context: ./frontend/cloudgamesharefrontend
-      dockerfile: frontend/cloudgamesharefrontend/Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
-    dependds_on:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:8080"
+    depends_on:
       cloudgameshare.catalog.presentation.webapi:
         condition: service_healthy
       cloudgameshare.gamingsession.presentation.webapi:
         condition: service_healthy
-    networks:   
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
       - cloudgameshare-network
+
+volumes:
+  catalog-postgres-data:
+  gaming-mongodb-data:
 
 networks:
   cloudgameshare-network:

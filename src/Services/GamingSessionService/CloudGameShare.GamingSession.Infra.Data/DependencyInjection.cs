@@ -12,6 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddGamingSessionData(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("MongoDBSettings:ConnectionString")
+            ?? configuration.GetConnectionString("GamingSessions")
             ?? throw new InvalidOperationException("Configure ConnectionStrings:GamingSessions.");  
 
         var databaseName = configuration["MongoDBSettings:DatabaseName"]

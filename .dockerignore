@@ -17,6 +17,9 @@
 **/docker-compose*
 **/Dockerfile*
 **/node_modules
+artifacts
+frontend
+runtime
 **/npm-debug.log
 **/obj
 **/secrets.dev.yaml
