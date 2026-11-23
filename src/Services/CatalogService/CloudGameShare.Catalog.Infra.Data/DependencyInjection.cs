@@ -17,7 +17,7 @@ public static class DependencyInjection
             services.AddScoped<PublishDomainEventsInterceptor>();
             services.AddDbContext<CloudGameShareCatalogContext>((provider, options) =>
             {
-                options.UseNpgsql(connectionString);
+                options.UseNpgsql(connectionString, postgres => postgres.EnableRetryOnFailure());
                 options.AddInterceptors(provider.GetRequiredService<PublishDomainEventsInterceptor>());
             });
             services.AddScoped<IGameRepository, GameRepository>();

@@ -460,6 +460,13 @@
 .steam-results button:hover { background: var(--blue); color: var(--cream); }
 .steam-results small { flex-shrink: 0; }
 
+.steam-autofill .requirements-note { margin-top: 9px; }
+.steam-requirements { margin-top: 10px; font-size: 14px; }
+.steam-requirements summary { cursor: pointer; font-weight: 700; }
+.steam-requirements h3 { margin: 12px 0 5px; }
+.steam-requirements h4 { margin: 9px 0 4px; }
+.steam-requirements p { white-space: pre-line; overflow-wrap: anywhere; }
+
 .add-fields {
   display: grid;
   min-width: 0;

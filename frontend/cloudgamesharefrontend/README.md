@@ -10,7 +10,7 @@ From this directory, run `npm install` and `npm run dev`. Vite proxies `/api/gam
 
 When hosting the built frontend, route `/api/games` on the same origin to the Catalog API. The Add Game form saves to that API, and the catalog uses `coverImageUrl` for card images.
 
-With Steam selected as the launcher, enter a title or numeric App ID in Add Game to retrieve metadata. Select a name match to fill the form. Choose English, Portuguese, or Brazilian Portuguese for Steam lookups. Review the imported fields and enter the runtime and hardware allocations before saving.
+With Steam selected as the launcher, enter a title or numeric App ID in Add Game to retrieve metadata. Select a name match to fill the form. Choose English, Portuguese, or Brazilian Portuguese for Steam lookups. Steam's PC minimum requirements fill RAM, storage, and explicitly stated CPU core counts; fractional GB round up to whole GB. Expand Steam hardware requirements to review the original minimum and recommended details for PC and Linux. Review the runtime and allocations, including the GPU count, before saving; processor models, clock speeds, and graphics memory do not specify pod core or GPU counts.
 
 The Catalog API exposes `GET /api/games/steam/search?name=Stardew%20Valley` and `GET /api/games/steam/413150`. Both accept an optional `language` query parameter. Steam lookups use the Store endpoints through Catalog's infrastructure service, with a 10-second timeout and bounded in-memory caching. These Store endpoints have an undocumented contract.
 

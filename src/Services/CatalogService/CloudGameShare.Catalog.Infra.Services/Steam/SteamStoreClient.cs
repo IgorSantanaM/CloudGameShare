@@ -51,7 +51,11 @@ public sealed class SteamStoreClient(HttpClient httpClient, IMemoryCache cache) 
         var game = new SteamGameDetailsDto(
             appId, data.Name, PlainText(data.ShortDescription), ParseDate(data.ReleaseDate, language),
             (data.Genres ?? []).Select(genre => genre.Description).Where(genre => !string.IsNullOrWhiteSpace(genre)).ToArray(),
-            data.Publishers ?? [], data.Developers ?? [], data.HeaderImage, data.Platforms?.Linux ?? false);
+            data.Publishers ?? [], data.Developers ?? [], data.HeaderImage, data.Platforms?.Linux ?? false)
+        {
+            PcRequirements = SteamRequirementsParser.Parse(data.PcRequirements),
+            LinuxRequirements = SteamRequirementsParser.Parse(data.LinuxRequirements)
+        };
 
         cache.Set(key, game, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15), Size = 1 });
         return game;
@@ -89,7 +93,8 @@ public sealed class SteamStoreClient(HttpClient httpClient, IMemoryCache cache) 
     private sealed record AppResponse(bool Success, AppData? Data);
     private sealed record AppData(
         string? Type, uint SteamAppid, string? Name, string? ShortDescription, string? HeaderImage,
-        string[]? Developers, string[]? Publishers, Genre[]? Genres, ReleaseDate? ReleaseDate, Platforms? Platforms);
+        string[]? Developers, string[]? Publishers, Genre[]? Genres, ReleaseDate? ReleaseDate, Platforms? Platforms,
+        JsonElement PcRequirements, JsonElement LinuxRequirements);
     private sealed record Genre(string Description);
     private sealed record ReleaseDate(bool ComingSoon, string? Date);
     private sealed record Platforms(bool Linux);

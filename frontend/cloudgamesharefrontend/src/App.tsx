@@ -88,6 +88,7 @@ function App() {
   }, [announcement])
 
   const applySteamGame = useCallback((game: SteamGameDetails) => {
+    const minimum = game.pcRequirements?.minimum
     const values = {
       name: game.name,
       description: game.description ?? '',
@@ -98,6 +99,10 @@ function App() {
       imageUrl: game.coverImageUrl ?? '',
       appId: String(game.appId),
       launcher: 'Steam',
+      cpuCores: minimum?.cpuCores?.toString() ?? '',
+      memoryGb: minimum?.memoryGb?.toString() ?? '',
+      storageGb: minimum?.storageGb?.toString() ?? '',
+      gpuCount: '',
     }
     for (const [name, value] of Object.entries(values)) {
       const field = addForm.current?.elements.namedItem(name)

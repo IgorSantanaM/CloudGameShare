@@ -24,6 +24,18 @@ export type CreateGame = {
 export type GameDetails = CreateGame & { id: string; isPublished: boolean }
 
 export type SteamGameSummary = { appId: number; name: string; coverImageUrl: string | null }
+export type SteamRequirementLevel = {
+  text: string
+  processor: string | null
+  graphics: string | null
+  cpuCores: number | null
+  memoryGb: number | null
+  storageGb: number | null
+}
+type SteamRequirements = {
+  minimum: SteamRequirementLevel | null
+  recommended: SteamRequirementLevel | null
+}
 export type SteamGameDetails = {
   appId: number
   name: string
@@ -34,6 +46,8 @@ export type SteamGameDetails = {
   developers: string[]
   coverImageUrl: string | null
   supportsLinux: boolean
+  pcRequirements: SteamRequirements | null
+  linuxRequirements: SteamRequirements | null
 }
 
 type CatalogPage = { items: CatalogGame[]; totalPages: number }
